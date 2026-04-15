@@ -196,22 +196,43 @@ const RulesSection = () => (
 const ScoringSection = () => {
   const [filter, setFilter] = useState('all');
 
+  // 將資料按台數分類，加入更多牌型
   const scores = [
+    // 1 台
     { name: '莊家', tai: 1, desc: '身為莊家，無論胡牌或放銃都多算1台。', category: 'basic' },
     { name: '門清', tai: 1, desc: '沒有吃、碰、明槓，全部牌都在自己門前。', category: 'basic' },
     { name: '自摸', tai: 1, desc: '自己摸到胡的牌。', category: 'basic' },
     { name: '花牌', tai: 1, desc: '拿到與自己座位對應的花（東1, 南2, 西3, 北4），或拿到相同顏色的花4張。', category: 'basic' },
+    { name: '風牌/字牌', tai: 1, desc: '拿到與圈風或門風相同的刻子，或是中、發、白任一組刻子（字牌1台，若為大/小三元不另計）。', category: 'basic' },
+    { name: '海底撈月', tai: 1, desc: '摸牌牆最後一張牌自摸胡牌。', category: 'basic' },
+    { name: '河底撈魚', tai: 1, desc: '胡牌牆最後一張摸出的牌（別人打出的最後一張）。', category: 'basic' },
+    { name: '槓上開花', tai: 1, desc: '暗槓或明槓後，補牌剛好自摸胡牌。', category: 'basic' },
+    { name: '搶槓', tai: 1, desc: '別人「加槓」（已經碰出，又摸到第四張要槓）時，剛好是你聽的牌，可搶槓胡牌。', category: 'basic' },
+
+    // 2 台
     { name: '平胡', tai: 2, desc: '全部都是順子，沒有刻子，且沒有字牌，不能單吊或獨聽。需非門清。', category: 'common' },
-    { name: '三暗刻', tai: 2, desc: '手中有三組自己摸到的刻子（未碰出）。', category: 'common' },
-    { name: '全求人', tai: 2, desc: '16張牌全部吃碰明槓出去，最後單吊別人打的牌胡牌。', category: 'common' },
+    { name: '三暗刻', tai: 2, desc: '手中有三組自己摸到的刻子（未碰出，暗槓也算）。', category: 'common' },
+    { name: '全求人', tai: 2, desc: '16張牌全部吃碰明槓出去，手牌剩一張，最後單吊別人打的牌胡牌。', category: 'common' },
+    { name: '三相逢 (外加)', tai: 2, desc: '萬、筒、索都有相同數字的順子（如123萬、123筒、123索）。需事前約定。', category: 'common' },
+    { name: '老少咸宜 (外加)', tai: 2, desc: '同一花色有一到九的順子（如123、456、789萬）。需事前約定。', category: 'common' },
+
+    // 4 台 及 5 台
     { name: '碰碰胡', tai: 4, desc: '全部都是刻子（碰牌或暗刻），沒有順子。', category: 'big' },
     { name: '混一色', tai: 4, desc: '由同一花色（萬/筒/索）加上字牌組成。', category: 'big' },
     { name: '小三元', tai: 4, desc: '中、發、白其中兩組刻子，一組作眼。', category: 'big' },
+    { name: '四暗刻', tai: 5, desc: '手中有四組自己摸到的刻子（未碰出）。', category: 'big' },
+
+    // 8 台以上
     { name: '清一色', tai: 8, desc: '全部由同一花色組成，完全沒有字牌。', category: 'huge' },
+    { name: '嚦咕嚦咕 (八對半)', tai: 8, desc: '台灣版的七對子。牌型必須為 7組對子 + 1組刻子，共17張牌。這屬於外加規則，開局前需約定。', category: 'huge' },
     { name: '大三元', tai: 8, desc: '集齊中、發、白三組刻子。', category: 'huge' },
+    { name: '五暗刻', tai: 8, desc: '手中有五組自己摸到的刻子（非常罕見）。', category: 'huge' },
     { name: '八仙過海', tai: 8, desc: '一人拿到全部8張花牌，直接宣告胡牌。', category: 'huge' },
     { name: '大四喜', tai: 16, desc: '集齊東、南、西、北四組刻子。', category: 'huge' },
     { name: '字一色', tai: 16, desc: '全部由字牌（東南西北中發白）組成。', category: 'huge' },
+    { name: '天胡', tai: 16, desc: '莊家起手補完花後，直接胡牌。（部分地區計24台）', category: 'huge' },
+    { name: '地胡', tai: 16, desc: '閒家在第一圈摸牌即自摸，且此前無人吃碰槓。（部分地區計24台）', category: 'huge' },
+    { name: '人胡', tai: 16, desc: '閒家在第一圈胡別人打出的牌，且此前無人吃碰槓。（部分地區計24台或不計）', category: 'huge' },
   ];
 
   const filteredScores = filter === 'all' ? scores : scores.filter(s => s.category === filter);
@@ -223,7 +244,7 @@ const ScoringSection = () => {
           { id: 'all', label: '全部' },
           { id: 'basic', label: '基本台 (1台)' },
           { id: 'common', label: '常見牌型 (2台)' },
-          { id: 'big', label: '大牌型 (4台)' },
+          { id: 'big', label: '大牌型 (4~5台)' },
           { id: 'huge', label: '極限牌型 (8台+)' },
         ].map(btn => (
           <button
@@ -256,7 +277,7 @@ const ScoringSection = () => {
       </div>
       
       <div className="mt-8 bg-blue-50 p-4 rounded-xl border border-blue-100 text-sm text-blue-800">
-        <p><strong>💡 提示：</strong> 各地的詳細台數計算可能會有些微差異，建議在遊戲開始前先與牌友溝通確認規則（俗稱「拜神」或「講例」）。</p>
+        <p><strong>💡 提示：</strong> 台灣麻雀有許多「地方規則」或「外加規則」（如三相逢、老少咸宜、嚦咕嚦咕、甚至天胡的台數是 16 還是 24）。建議在遊戲開始前先與牌友溝通確認，俗稱「拜神」或「講例」，以免產生爭議。</p>
       </div>
     </div>
   );
